@@ -91,20 +91,34 @@ export default function WebcamFilter({
     if (showSideBySide) {
       // Side-by-side comparison
       const halfWidth = width / 2
-
-      // Draw original on left half
-      ctx.drawImage(video, 0, 0, width, height, 0, 0, halfWidth, height)
-
-      // Draw filtered on right half
-      ctx.drawImage(video, 0, 0, width, height, halfWidth, 0, halfWidth, height)
       
+      // Draw full video frame first
+      ctx.drawImage(video, 0, 0, width, height)
+      
+      // Get the full frame
+      const fullImageData = ctx.getImageData(0, 0, width, height)
+      
+      // Apply filter to the FULL frame
       if (currentFilter !== 'none') {
-        const rightImageData = ctx.getImageData(halfWidth, 0, halfWidth, height)
-        const filteredData = applyFilter(rightImageData, currentFilter, {
+        const filteredData = applyFilter(fullImageData, currentFilter, {
           kernelSize: Math.max(3, Math.floor(gaussianKernel * scale)),
           sigma: gaussianSigma,
         })
-        ctx.putImageData(filteredData, halfWidth, 0)
+        
+        // Put back only the RIGHT half as filtered
+        // Left half stays original
+        for (let y = 0; y < height; y++) {
+          for (let x = halfWidth; x < width; x++) {
+            const idx = (y * width + x) * 4
+            fullImageData.data[idx] = filteredData.data[idx]
+            fullImageData.data[idx + 1] = filteredData.data[idx + 1]
+            fullImageData.data[idx + 2] = filteredData.data[idx + 2]
+            fullImageData.data[idx + 3] = filteredData.data[idx + 3]
+          }
+        }
+        
+        // Put the combined image back
+        ctx.putImageData(fullImageData, 0, 0)
       }
 
       // Draw dividing line
