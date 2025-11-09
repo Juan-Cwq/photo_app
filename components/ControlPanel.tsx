@@ -67,40 +67,40 @@ export default function ControlPanel({
           {/* Kernel Size */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Kernel Size: {gaussianKernel}
+              Blur Strength: {gaussianKernel}
             </label>
             <input
               type="range"
               min="3"
-              max="51"
+              max="15"
               step="2"
               value={gaussianKernel}
               onChange={(e) => setGaussianKernel(parseInt(e.target.value))}
               className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
             />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>3</span>
-              <span>51</span>
+              <span>Light</span>
+              <span>Heavy</span>
             </div>
           </div>
 
           {/* Sigma */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Sigma: {gaussianSigma}
+              Smoothness: {gaussianSigma}
             </label>
             <input
               type="range"
-              min="0"
-              max="20"
+              min="1"
+              max="10"
               step="1"
               value={gaussianSigma}
               onChange={(e) => setGaussianSigma(parseInt(e.target.value))}
               className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
             />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>0 (auto)</span>
-              <span>20</span>
+              <span>Sharp</span>
+              <span>Smooth</span>
             </div>
           </div>
         </div>

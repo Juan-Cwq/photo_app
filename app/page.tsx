@@ -6,8 +6,8 @@ import ControlPanel from '@/components/ControlPanel'
 
 export default function Home() {
   const [currentFilter, setCurrentFilter] = useState<string>('none')
-  const [gaussianKernel, setGaussianKernel] = useState<number>(15)
-  const [gaussianSigma, setGaussianSigma] = useState<number>(5)
+  const [gaussianKernel, setGaussianKernel] = useState<number>(9)
+  const [gaussianSigma, setGaussianSigma] = useState<number>(3)
   const [showSideBySide, setShowSideBySide] = useState<boolean>(false)
 
   return (

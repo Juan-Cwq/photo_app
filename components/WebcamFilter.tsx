@@ -78,46 +78,54 @@ export default function WebcamFilter({
       return
     }
 
-    // Set canvas size to match video
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
+    // Set canvas size to match video (reduce resolution for performance)
+    const scale = 0.5 // Process at half resolution for better performance
+    const width = Math.floor(video.videoWidth * scale)
+    const height = Math.floor(video.videoHeight * scale)
+    
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width
+      canvas.height = height
+    }
 
     if (showSideBySide) {
       // Side-by-side comparison
-      const halfWidth = canvas.width / 2
+      const halfWidth = width / 2
 
       // Draw original on left half
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height, 0, 0, halfWidth, canvas.height)
+      ctx.drawImage(video, 0, 0, width, height, 0, 0, halfWidth, height)
 
       // Draw filtered on right half
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height, halfWidth, 0, halfWidth, canvas.height)
+      ctx.drawImage(video, 0, 0, width, height, halfWidth, 0, halfWidth, height)
       
-      const rightImageData = ctx.getImageData(halfWidth, 0, halfWidth, canvas.height)
-      const filteredData = applyFilter(rightImageData, currentFilter, {
-        kernelSize: gaussianKernel,
-        sigma: gaussianSigma,
-      })
-      ctx.putImageData(filteredData, halfWidth, 0)
+      if (currentFilter !== 'none') {
+        const rightImageData = ctx.getImageData(halfWidth, 0, halfWidth, height)
+        const filteredData = applyFilter(rightImageData, currentFilter, {
+          kernelSize: Math.max(3, Math.floor(gaussianKernel * scale)),
+          sigma: gaussianSigma,
+        })
+        ctx.putImageData(filteredData, halfWidth, 0)
+      }
 
       // Draw dividing line
       ctx.strokeStyle = '#00FFFF'
-      ctx.lineWidth = 3
+      ctx.lineWidth = 2
       ctx.beginPath()
       ctx.moveTo(halfWidth, 0)
-      ctx.lineTo(halfWidth, canvas.height)
+      ctx.lineTo(halfWidth, height)
       ctx.stroke()
 
       // Draw labels
-      drawLabel(ctx, 'ORIGINAL', 20, 60, '#FFFFFF', '#666666')
-      drawLabel(ctx, 'FILTERED', halfWidth + 20, 60, '#00FF00', '#00FF00')
+      drawLabel(ctx, 'ORIGINAL', 10, 30, '#FFFFFF', '#666666')
+      drawLabel(ctx, 'FILTERED', halfWidth + 10, 30, '#00FF00', '#00FF00')
     } else {
       // Full screen filtered view
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+      ctx.drawImage(video, 0, 0, width, height)
       
       if (currentFilter !== 'none') {
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const imageData = ctx.getImageData(0, 0, width, height)
         const filteredData = applyFilter(imageData, currentFilter, {
-          kernelSize: gaussianKernel,
+          kernelSize: Math.max(3, Math.floor(gaussianKernel * scale)),
           sigma: gaussianSigma,
         })
         ctx.putImageData(filteredData, 0, 0)
@@ -125,7 +133,7 @@ export default function WebcamFilter({
     }
 
     // Draw filter info
-    drawFilterInfo(ctx, canvas.width, currentFilter, gaussianKernel, gaussianSigma)
+    drawFilterInfo(ctx, width, currentFilter, gaussianKernel, gaussianSigma)
 
     animationRef.current = requestAnimationFrame(processFrame)
   }
